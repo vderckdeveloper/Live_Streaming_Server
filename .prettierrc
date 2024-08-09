@@ -1,4 +1,8 @@
 {
+  "endOfLine": "off",
+  "printWidth": 200,
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "skipBlankLines": true,
+  "ignoreComments": true
 }
