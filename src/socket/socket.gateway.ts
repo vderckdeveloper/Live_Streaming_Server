@@ -10,6 +10,9 @@ import { Server, Socket } from 'socket.io';
 // room name service
 import { RoomNameService } from 'src/roomname/roomName.service';
 
+// member room service0
+import { MemberRoomService } from 'src/memberroom/memberRoom.service';
+
 // origin host for development and production
 const developmentOriginHost = 'http://localhost:3000';
 const productionOriginHost = 'https://your-service-domain.com';
@@ -37,25 +40,42 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // constructor
     constructor(
         private readonly roomNameService: RoomNameService,
+        private readonly memberRoomService: MemberRoomService,
     ) { }
 
     async handleConnection(socket: Socket, _) {
 
     }
 
-    handleDisconnect(socket: Socket) {
-       
+    handleDisconnect(socket: Socket) {        
+       // find which room the member joined
+       const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+       // remove member from the room when disconnected
+       this.roomNameService.removeMember(roomCode, socket.id);
+
+       // remove member room from the tracking
+       this.memberRoomService.deleteMemberRoom(socket.id);
     }
 
     @SubscribeMessage('register')
     async handleRegister(socket: any, roomCode: RoomCode) {
         // check room code type
         if (typeof roomCode !== 'string') return;
-        // create room if the participant is the first member or add member into the room
-        this.roomNameService.setRoom(roomCode, socket.id);
 
+        // If room members exceed 4, disconnect the socket
         const roomMember = this.roomNameService.getMembers(roomCode);
-        console.log(roomMember);
+        if (roomMember.length >= 4) {
+            socket.emit('error', 'Room is full');
+            socket.disconnect(true);
+            return;
+        }
+
+        // create room if the participant is the first member or add member into the room
+        this.roomNameService.setRoom(roomCode, socket.id);  
+        
+        // map each member to a room to track
+        this.memberRoomService.setMemberRoom(socket.id, roomCode);
     }
 
     @SubscribeMessage('candidate')
