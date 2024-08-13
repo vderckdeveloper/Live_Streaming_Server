@@ -25,6 +25,10 @@ interface SDPMessage {
     roomCode: string;
 }
 
+interface ICECandidate {
+    roomCode: string;
+}
+
 interface Message {
     roomCode: string;
 }
@@ -86,9 +90,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('candidate')
-    async handleCandidate(socket: any, message: Message) {
+    async handleCandidate(socket: any,ICEcandidate: ICECandidate) {
         // candidate message sent
-        // console.log('candidate', message);
+        console.log('candidate', ICEcandidate);
+
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // Broadcast the ICE candidate to all other clients in the room except the sender
+        socket.to(roomCode).emit('candidate', ICEcandidate);
     }
 
     @SubscribeMessage('offer')
@@ -97,9 +106,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // Broadcast the offer to all other clients in the room except the sender
         socket.to(roomCode).emit('offer', SDPmessage);
-
-        // // Broadcast the offer to all clients in the room, including the sender
-        // this.server.in(roomCode).emit('offer', SDPmessage);
     }
 
     @SubscribeMessage('answer')
@@ -109,7 +115,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
-        // Broadcast the offer to all other clients in the room except the sender
-        socket.to(roomCode).emit('offer', SDPmessage);
+        // Broadcast the answer to all other clients in the room except the sender
+        socket.to(roomCode).emit('answer', SDPmessage);
     }
 }
