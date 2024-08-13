@@ -71,9 +71,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // check room code type
         if (typeof roomCode !== 'string') return;
 
-        // If room members exceed 4, disconnect the socket
+        // If room members exceed 2, disconnect the socket
         const roomMember = this.roomNameService.getMembers(roomCode);
-        if (roomMember.length >= 4) {
+        if (roomMember.length >= 2) {
             socket.emit('error', 'Room is full');
             socket.disconnect(true);
             return;
