@@ -21,6 +21,10 @@ interface RoomCode {
     roomCode: string;
 }
 
+interface SDPMessage {
+    roomCode: string;
+}
+
 interface Message {
     roomCode: string;
 }
@@ -47,15 +51,15 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     }
 
-    handleDisconnect(socket: Socket) {        
-       // find which room the member joined
-       const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+    handleDisconnect(socket: Socket) {
+        // find which room the member joined
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
-       // remove member from the room when disconnected
-       this.roomNameService.removeMember(roomCode, socket.id);
+        // remove member from the room when disconnected
+        this.roomNameService.removeMember(roomCode, socket.id);
 
-       // remove member room from the tracking
-       this.memberRoomService.deleteMemberRoom(socket.id);
+        // remove member room from the tracking
+        this.memberRoomService.deleteMemberRoom(socket.id);
     }
 
     @SubscribeMessage('register')
@@ -72,10 +76,13 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         // create room if the participant is the first member or add member into the room
-        this.roomNameService.setRoom(roomCode, socket.id);  
-        
+        this.roomNameService.setRoom(roomCode, socket.id);
+
         // map each member to a room to track
         this.memberRoomService.setMemberRoom(socket.id, roomCode);
+
+        // join room
+        socket.join(roomCode);
     }
 
     @SubscribeMessage('candidate')
@@ -85,14 +92,24 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('offer')
-    async handleOffer(socket: any, message: Message) {
-        // offer
-        // console.log('candidate', message);
+    async handleOffer(socket: any, SDPmessage: SDPMessage) {
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // Broadcast the offer to all other clients in the room except the sender
+        socket.to(roomCode).emit('offer', SDPmessage);
+
+        // // Broadcast the offer to all clients in the room, including the sender
+        // this.server.in(roomCode).emit('offer', SDPmessage);
     }
 
     @SubscribeMessage('answer')
-    async handleAnswer(socket: any, message: Message) {
+    async handleAnswer(socket: any, SDPmessage: SDPMessage) {
         // answer
-        // console.log('candidate', message);
+        console.log('candidate', SDPmessage);
+
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // Broadcast the offer to all other clients in the room except the sender
+        socket.to(roomCode).emit('offer', SDPmessage);
     }
 }
