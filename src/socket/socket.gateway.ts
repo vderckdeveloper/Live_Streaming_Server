@@ -27,7 +27,7 @@ interface OfferSDPMessage {
         type: string;
     }; 
     offerId: string;
-    peerId: string;
+    answerId: string;
 }
 
 interface AnswerSDPMessage {
@@ -36,7 +36,7 @@ interface AnswerSDPMessage {
         type: string;
     }; 
     offerId: string;
-    peerId: string;
+    answerId: string;
 }
 
 interface ICECandidate {
@@ -46,7 +46,7 @@ interface ICECandidate {
         spdMLineIndex: number;
         usernameFragment: string;
     };
-    peerId: string;
+    answerId: string;
 }
 
 @WebSocketGateway({
@@ -113,7 +113,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // send peer socket id to the later participant
         otherMembers.forEach(peerSocketId => {
-            socket.emit('register', { offerId: socket.id, peerId: peerSocketId });
+            socket.emit('register', { offerId: socket.id, answerId: peerSocketId });
         });
     }
 
@@ -121,20 +121,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('candidate')
     async handleCandidate(socket: any, ICEcandidate: ICECandidate) {
         // peer id
-        const { peerId } = ICEcandidate;
+        const { answerId } = ICEcandidate;
 
         // send candidate list to the previosuly joined member (offer member -> answer member) 
-        socket.to(peerId).emit('candidate', ICEcandidate);
+        socket.to(answerId).emit('candidate', ICEcandidate);
     }
 
     // subscribe offer
     @SubscribeMessage('offer')
     async handleOffer(socket: any, offerSDPMessage: OfferSDPMessage) {
         // peer id
-        const { peerId } = offerSDPMessage;
+        const { answerId } = offerSDPMessage;
 
         // send offer to the previosuly joined member (offer member -> answer member)
-        socket.to(peerId).emit('offer', offerSDPMessage);
+        socket.to(answerId).emit('offer', offerSDPMessage);
     }
 
     // subscribe answer
