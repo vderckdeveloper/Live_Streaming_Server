@@ -46,6 +46,7 @@ interface ICECandidate {
         spdMLineIndex: number;
         usernameFragment: string;
     };
+    offerId: string;
     answerId: string;
 }
 
@@ -117,33 +118,43 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
-    // subscribe candidate
-    @SubscribeMessage('candidate')
-    async handleCandidate(socket: any, ICEcandidate: ICECandidate) {
+    // subscribe offer candidate (offer member -> answer member) 
+    @SubscribeMessage('offercandidate')
+    async handleOfferCandidate(socket: any, ICEcandidate: ICECandidate) {
         // peer id
         const { answerId } = ICEcandidate;
 
-        // send candidate list to the previosuly joined member (offer member -> answer member) 
-        socket.to(answerId).emit('candidate', ICEcandidate);
+        // send candidate list to the previosuly joined member 
+        socket.to(answerId).emit('offercandidate', ICEcandidate);
     }
 
-    // subscribe offer
+    // subscribe answer candidate (answer member -> offer member)
+    @SubscribeMessage('answercandidate')
+    async handleAnswerCandidate(socket: any, ICEcandidate: ICECandidate) {
+        // peer id
+        const { offerId } = ICEcandidate;
+
+        // send candidate list to the previosuly joined member  
+        socket.to(offerId).emit('answercandidate', ICEcandidate);
+    }
+
+    // subscribe offer (offer member -> answer member)
     @SubscribeMessage('offer')
     async handleOffer(socket: any, offerSDPMessage: OfferSDPMessage) {
         // peer id
         const { answerId } = offerSDPMessage;
 
-        // send offer to the previosuly joined member (offer member -> answer member)
+        // send offer to the previosuly joined member 
         socket.to(answerId).emit('offer', offerSDPMessage);
     }
 
-    // subscribe answer
-    @SubscribeMessage('answer')
+    // subscribe answer (answer member -> offer member)
+    @SubscribeMessage('answer') 
     async handleAnswer(socket: any, answerSDPmessage: AnswerSDPMessage) {
         // offer id
         const { offerId } = answerSDPmessage; 
 
-        // send answer to the later joined member (answer member -> offer member)
+        // send answer to the later joined member 
         socket.to(offerId).emit('answer', answerSDPmessage);
     }
 }
