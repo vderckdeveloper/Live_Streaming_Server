@@ -28,11 +28,13 @@ interface SDPMessage {
 }
 
 interface ICECandidate {
-    roomCode: string;
-}
-
-interface Message {
-    roomCode: string;
+    candidate: {
+        candidate :string;
+        spdMid: string;
+        spdMLineIndex: number;
+        usernameFragment: string;
+    };
+    peerId: string;
 }
 
 @WebSocketGateway({
@@ -101,18 +103,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('candidate')
     async handleCandidate(socket: any, ICEcandidate: ICECandidate) {
-        // // candidate message sent
-        // console.log('candidate', ICEcandidate);
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
-        const roomMember = this.roomNameService.getMembers(roomCode);
+        const { peerId } = ICEcandidate;
 
-        // Filter out the current socket ID from the room members
-        const otherMembers = roomMember.filter(peerSocketId => peerSocketId !== socket.id);
-
-        // Broadcast the ICE candidate to all other clients in the room except the sender
-        otherMembers.forEach(peerSocketId => {
-            socket.to(peerSocketId).emit('candidate', ICEcandidate);
-        });
+        socket.to(peerId).emit('candidate', ICEcandidate);
     }
 
     @SubscribeMessage('offer')
