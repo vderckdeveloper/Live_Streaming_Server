@@ -21,10 +21,22 @@ interface RoomCode {
     roomCode: string;
 }
 
-interface SDPMessage {
-    roomCode: string;
-    offerId ?: string;
-    peerId ?: string;
+interface OfferSDPMessage {
+    offer: {
+        sdp: string;
+        type: string;
+    }; 
+    offerId: string;
+    peerId: string;
+}
+
+interface AnswerSDPMessage {
+    answer: {
+        sdp: string;
+        type: string;
+    }; 
+    offerId: string;
+    peerId: string;
 }
 
 interface ICECandidate {
@@ -55,10 +67,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         private readonly memberRoomService: MemberRoomService,
     ) { }
 
+    // handle connection
     async handleConnection(socket: Socket, _) {
 
     }
 
+    // handle disconnection
     handleDisconnect(socket: Socket) {
         // find which room the member joined
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
@@ -70,6 +84,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.memberRoomService.deleteMemberRoom(socket.id);
     }
 
+    // subscribe register
     @SubscribeMessage('register')
     async handleRegister(socket: any, roomCode: RoomCode) {
         // check room code type
@@ -77,6 +92,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // If room members exceed 2, disconnect the socket
         const roomMember = this.roomNameService.getMembers(roomCode);
+        // return if room member is equal or more than 4 (only 4 room members are allowed)
         if (roomMember.length >= 4) {
             socket.emit('error', 'Room is full');
             socket.disconnect(true);
@@ -101,28 +117,33 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
+    // subscribe candidate
     @SubscribeMessage('candidate')
     async handleCandidate(socket: any, ICEcandidate: ICECandidate) {
+        // peer id
         const { peerId } = ICEcandidate;
 
+        // send candidate list to the previosuly joined member (offer member -> answer member) 
         socket.to(peerId).emit('candidate', ICEcandidate);
     }
 
+    // subscribe offer
     @SubscribeMessage('offer')
-    async handleOffer(socket: any, SDPmessage: SDPMessage) {
+    async handleOffer(socket: any, offerSDPMessage: OfferSDPMessage) {
         // peer id
-        const { peerId } = SDPmessage;
+        const { peerId } = offerSDPMessage;
 
-        // Broadcast the ICE candidate to all other clients in the room except the sender
-        socket.to(peerId).emit('offer', SDPmessage);
+        // send offer to the previosuly joined member (offer member -> answer member)
+        socket.to(peerId).emit('offer', offerSDPMessage);
     }
 
+    // subscribe answer
     @SubscribeMessage('answer')
-    async handleAnswer(socket: any, SDPmessage: SDPMessage) {
+    async handleAnswer(socket: any, answerSDPmessage: AnswerSDPMessage) {
         // offer id
-        const { offerId } = SDPmessage; 
+        const { offerId } = answerSDPmessage; 
 
-        // Broadcast the ICE candidate to all other clients in the room except the sender
-        socket.to(offerId).emit('answer', SDPmessage);
+        // send answer to the later joined member (answer member -> offer member)
+        socket.to(offerId).emit('answer', answerSDPmessage);
     }
 }
