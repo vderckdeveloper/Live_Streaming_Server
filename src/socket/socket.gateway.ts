@@ -21,6 +21,28 @@ interface RoomCode {
     roomCode: string;
 }
 
+interface OfferICECandidate {
+    candidate: {
+        candidate :string;
+        spdMid: string;
+        spdMLineIndex: number;
+        usernameFragment: string;
+    };
+    offerId: string;
+    answerId: string;
+}
+
+interface AnswerICECandidate {
+    candidate: {
+        candidate :string;
+        spdMid: string;
+        spdMLineIndex: number;
+        usernameFragment: string;
+    };
+    offerId: string;
+    answerId: string;
+}
+
 interface OfferSDPMessage {
     offer: {
         sdp: string;
@@ -35,17 +57,6 @@ interface AnswerSDPMessage {
         sdp: string;
         type: string;
     }; 
-    offerId: string;
-    answerId: string;
-}
-
-interface ICECandidate {
-    candidate: {
-        candidate :string;
-        spdMid: string;
-        spdMLineIndex: number;
-        usernameFragment: string;
-    };
     offerId: string;
     answerId: string;
 }
@@ -120,22 +131,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // subscribe offer candidate (offer member -> answer member) 
     @SubscribeMessage('offercandidate')
-    async handleOfferCandidate(socket: any, ICEcandidate: ICECandidate) {
+    async handleOfferCandidate(socket: any, offerICEcandidate: OfferICECandidate) {
         // peer id
-        const { answerId } = ICEcandidate;
+        const { answerId } = offerICEcandidate;
 
         // send candidate list to the previosuly joined member 
-        socket.to(answerId).emit('offercandidate', ICEcandidate);
+        socket.to(answerId).emit('offercandidate', offerICEcandidate);
     }
 
     // subscribe answer candidate (answer member -> offer member)
     @SubscribeMessage('answercandidate')
-    async handleAnswerCandidate(socket: any, ICEcandidate: ICECandidate) {
+    async handleAnswerCandidate(socket: any, answerICEcandidate: AnswerICECandidate) {
         // peer id
-        const { offerId } = ICEcandidate;
+        const { offerId } = answerICEcandidate;
 
         // send candidate list to the previosuly joined member  
-        socket.to(offerId).emit('answercandidate', ICEcandidate);
+        socket.to(offerId).emit('answercandidate', answerICEcandidate);
     }
 
     // subscribe offer (offer member -> answer member)
