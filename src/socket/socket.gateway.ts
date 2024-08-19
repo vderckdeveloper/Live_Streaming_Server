@@ -81,7 +81,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // handle connection
     async handleConnection(socket: Socket, _) {
-
     }
 
     // handle disconnection
@@ -138,7 +137,11 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Filter out the current socket ID from the room members
         const otherMembers = roomMember.filter(peerSocketId => peerSocketId !== socket.id);
 
-        // send peer socket id to the later participant
+        // send how many room members are in the room to all the member in the room
+        const roomMemberCount = roomMember.length;
+        socket.in(roomCode).emit('roomMemberCount', roomMemberCount);
+
+        // send peer socket id to the later participant 
         otherMembers.forEach(peerSocketId => {
             socket.emit('register', { offerId: socket.id, answerId: peerSocketId });
         });
