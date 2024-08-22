@@ -23,7 +23,7 @@ interface RoomCode {
 
 interface OfferICECandidate {
     candidate: {
-        candidate :string;
+        candidate: string;
         spdMid: string;
         spdMLineIndex: number;
         usernameFragment: string;
@@ -34,7 +34,7 @@ interface OfferICECandidate {
 
 interface AnswerICECandidate {
     candidate: {
-        candidate :string;
+        candidate: string;
         spdMid: string;
         spdMLineIndex: number;
         usernameFragment: string;
@@ -47,7 +47,7 @@ interface OfferSDPMessage {
     offer: {
         sdp: string;
         type: string;
-    }; 
+    };
     offerId: string;
     answerId: string;
 }
@@ -56,7 +56,7 @@ interface AnswerSDPMessage {
     answer: {
         sdp: string;
         type: string;
-    }; 
+    };
     offerId: string;
     answerId: string;
 }
@@ -116,20 +116,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // check room code type
         if (typeof roomCode !== 'string') return;
 
-        // If room members exceed 2, disconnect the socket
-        const roomMember = this.roomNameService.getMembers(roomCode);
-        // return if room member is equal or more than 4 (only 4 room members are allowed)
-        if (roomMember.length >= 4) {
-            socket.emit('error', 'Room is full');
-            socket.disconnect(true);
-            return;
-        }
-
         // create room if the participant is the first member or add member into the room
         this.roomNameService.setRoom(roomCode, socket.id);
 
         // map each member to a room to track
         this.memberRoomService.setMemberRoom(socket.id, roomCode);
+
+        // If room members exceed 4, disconnect the socket
+        const roomMember = this.roomNameService.getMembers(roomCode);
+        // return if room member is equal or more than 4 (only 4 room members are allowed)
+        if (roomMember.length > 4) {
+            socket.emit('error', 'Room is full');
+            socket.disconnect(true);
+            return;
+        }
 
         // join room
         socket.join(roomCode);
@@ -139,7 +139,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // send how many room members are in the room to all the member in the room
         const roomMemberCount = roomMember.length;
-        socket.in(roomCode).emit('roomMemberCount', roomMemberCount);
+        this.server.in(roomCode).emit('roomMemberCount', roomMemberCount);
 
         // send peer socket id to the later participant 
         otherMembers.forEach(peerSocketId => {
@@ -178,10 +178,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // subscribe answer (answer member -> offer member)
-    @SubscribeMessage('answer') 
+    @SubscribeMessage('answer')
     async handleAnswer(socket: any, answerSDPmessage: AnswerSDPMessage) {
         // offer id
-        const { offerId } = answerSDPmessage; 
+        const { offerId } = answerSDPmessage;
 
         // send answer to the later joined member 
         socket.to(offerId).emit('answer', answerSDPmessage);
