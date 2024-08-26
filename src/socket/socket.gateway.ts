@@ -126,7 +126,13 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const roomMember = this.roomNameService.getMembers(roomCode);
         // return if room member is equal or more than 4 (only 4 room members are allowed)
         if (roomMember.length > 4) {
-            socket.emit('error', 'Room is full');
+            // error Message
+            const errorMessage = {
+                statusCode: 403,
+                message: 'room_is_full',
+            };
+
+            socket.emit('room_error', errorMessage);
             socket.disconnect(true);
             return;
         }
@@ -150,6 +156,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe offer candidate (offer member -> answer member) 
     @SubscribeMessage('offercandidate')
     async handleOfferCandidate(socket: any, offerICEcandidate: OfferICECandidate) {
+        // find which room the member joined
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // check room
+        if (!roomCode) {
+            // error Message
+            const errorMessage = {
+                statusCode: 409,
+                message: 'user_did_not_join_the_room',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // peer id
         const { answerId } = offerICEcandidate;
 
@@ -160,6 +182,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe answer candidate (answer member -> offer member)
     @SubscribeMessage('answercandidate')
     async handleAnswerCandidate(socket: any, answerICEcandidate: AnswerICECandidate) {
+        // find which room the member joined
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // check room
+        if (!roomCode) {
+            // error Message
+            const errorMessage = {
+                statusCode: 409,
+                message: 'user_did_not_join_the_room',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // peer id
         const { offerId } = answerICEcandidate;
 
@@ -170,6 +208,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe offer (offer member -> answer member)
     @SubscribeMessage('offer')
     async handleOffer(socket: any, offerSDPMessage: OfferSDPMessage) {
+        // find which room the member joined
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // check room
+        if (!roomCode) {
+            // error Message
+            const errorMessage = {
+                statusCode: 409,
+                message: 'user_did_not_join_the_room',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // peer id
         const { answerId } = offerSDPMessage;
 
@@ -180,6 +234,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe answer (answer member -> offer member)
     @SubscribeMessage('answer')
     async handleAnswer(socket: any, answerSDPmessage: AnswerSDPMessage) {
+        // find which room the member joined
+        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+
+        // check room
+        if (!roomCode) {
+             // error Message
+             const errorMessage = {
+                statusCode: 409,
+                message: 'user_did_not_join_the_room',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // offer id
         const { offerId } = answerSDPmessage;
 
