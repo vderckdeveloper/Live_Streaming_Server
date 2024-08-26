@@ -4,9 +4,12 @@ import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
+// session adapter
+import { RedisAdapter } from './adapter/redisAdapter.adapter';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   const port = process.env.SERVER_PORT;
 
   // serve static files
@@ -28,6 +31,15 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST'],
   });
+
+  // session adapter
+  const redisAdapter = new RedisAdapter(app);
+
+  // Ensure the adapter is initialized before any server or WebSocket setup
+  await redisAdapter.initializeAdapter();
+
+  // Use the WebSocket adapter in your NestJS application
+  app.useWebSocketAdapter(redisAdapter);
 
 
   await app.listen(port);
