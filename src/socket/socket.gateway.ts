@@ -84,9 +84,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // handle disconnection
-    handleDisconnect(socket: Socket) {
+    async handleDisconnect(socket: Socket) {
         // find which room the member joined
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+        const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
         // remove member from the room when disconnected
         this.roomNameService.removeMember(roomCode, socket.id);
@@ -95,7 +95,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.memberRoomService.deleteMemberRoom(socket.id);
 
         // get room member list
-        const roomMember = this.roomNameService.getMembers(roomCode);
+        const roomMember: string[] = await this.roomNameService.getMembers(roomCode);
 
         // room member count
         const roomMemberCount = roomMember.length;
@@ -123,7 +123,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.memberRoomService.setMemberRoom(socket.id, roomCode);
 
         // If room members exceed 4, disconnect the socket
-        const roomMember = this.roomNameService.getMembers(roomCode);
+        const roomMember: string[] = await this.roomNameService.getMembers(roomCode);
         // return if room member is equal or more than 4 (only 4 room members are allowed)
         if (roomMember.length > 4) {
             // error Message
