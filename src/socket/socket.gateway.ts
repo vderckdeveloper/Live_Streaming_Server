@@ -156,6 +156,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe offer candidate (offer member -> answer member) 
     @SubscribeMessage('offercandidate')
     async handleOfferCandidate(socket: any, offerICEcandidate: OfferICECandidate) {
+        // offer member id
+        const { offerId } = offerICEcandidate;
+        if (socket.id !== offerId) {
+            // error Message
+            const errorMessage = {
+                statusCode: 401,
+                message: 'user_socket_id_is_not_valid',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // find which room the member joined
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
@@ -182,6 +196,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe answer candidate (answer member -> offer member)
     @SubscribeMessage('answercandidate')
     async handleAnswerCandidate(socket: any, answerICEcandidate: AnswerICECandidate) {
+        // answer member id
+        const { answerId } = answerICEcandidate;
+        if (socket.id !== answerId) {
+            // error Message
+            const errorMessage = {
+                statusCode: 401,
+                message: 'user_socket_id_is_not_valid',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // find which room the member joined
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
@@ -208,6 +236,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe offer (offer member -> answer member)
     @SubscribeMessage('offer')
     async handleOffer(socket: any, offerSDPMessage: OfferSDPMessage) {
+        // offer member id
+        const { offerId } = offerSDPMessage;
+        if (socket.id !== offerId) {
+            // error Message
+            const errorMessage = {
+                statusCode: 401,
+                message: 'user_socket_id_is_not_valid',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // find which room the member joined
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
@@ -234,13 +276,27 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // subscribe answer (answer member -> offer member)
     @SubscribeMessage('answer')
     async handleAnswer(socket: any, answerSDPmessage: AnswerSDPMessage) {
+        // answer member id
+        const { answerId } = answerSDPmessage;
+        if (socket.id !== answerId) {
+            // error Message
+            const errorMessage = {
+                statusCode: 401,
+                message: 'user_socket_id_is_not_valid',
+            };
+
+            socket.emit('room_error', errorMessage);
+            socket.disconnect(true);
+            return;
+        }
+
         // find which room the member joined
         const roomCode = this.memberRoomService.getMemberRoom(socket.id);
 
         // check room
         if (!roomCode) {
-             // error Message
-             const errorMessage = {
+            // error Message
+            const errorMessage = {
                 statusCode: 409,
                 message: 'user_did_not_join_the_room',
             };
