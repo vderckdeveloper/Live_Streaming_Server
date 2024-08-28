@@ -88,26 +88,29 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // find which room the member joined
         const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
-        // remove member from the room when disconnected
-        this.roomNameService.removeMember(roomCode, socket.id);
+        // check room
+        if (roomCode) {
+            // remove member from the room when disconnected
+            await this.roomNameService.removeMember(roomCode, socket.id);
 
-        // remove member room from the tracking
-        this.memberRoomService.deleteMemberRoom(socket.id);
+            // remove member room from the tracking
+            await this.memberRoomService.deleteMemberRoom(socket.id);
 
-        // get room member list
-        const roomMember: string[] = await this.roomNameService.getMembers(roomCode);
+            // get room member list
+            const roomMember: string[] = await this.roomNameService.getMembers(roomCode);
 
-        // room member count
-        const roomMemberCount = roomMember.length;
+            // room member count
+            const roomMemberCount = roomMember.length;
 
-        // data to send 
-        const data = {
-            disconnectedMemberId: socket.id,
-            roomMemberCount: roomMemberCount
+            // data to send 
+            const data = {
+                disconnectedMemberId: socket.id,
+                roomMemberCount: roomMemberCount
+            }
+
+            // send room member who got disconnected
+            socket.to(roomCode).emit('disconnectedMember', data);
         }
-
-        // send room member who got disconnected
-        socket.to(roomCode).emit('disconnectedMember', data);
     }
 
     // subscribe register
