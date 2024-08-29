@@ -13,6 +13,9 @@ import { RoomNameService } from 'src/roomname/roomName.service';
 // member room service0
 import { MemberRoomService } from 'src/memberroom/memberRoom.service';
 
+// member assign service
+import { MemberAssignService } from 'src/memberassign/memberAssign.service';
+
 // origin host for development and production
 const developmentOriginHost = 'http://localhost:3000';
 const productionOriginHost = 'https://your-service-domain.com';
@@ -50,6 +53,7 @@ interface OfferSDPMessage {
     };
     offerId: string;
     answerId: string;
+    assignedId: string;
 }
 
 interface AnswerSDPMessage {
@@ -77,6 +81,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly roomNameService: RoomNameService,
         private readonly memberRoomService: MemberRoomService,
+        private readonly memberAssignService: MemberAssignService,
     ) { }
 
     // handle connection
@@ -95,6 +100,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
             // remove member room from the tracking
             await this.memberRoomService.deleteMemberRoom(socket.id);
+
+            // remover assigned id
+            await this.memberAssignService.RemoveMemberOnDisconnect(roomCode, socket.id);
 
             // get room member list
             const roomMember: string[] = await this.roomNameService.getMembers(roomCode);
@@ -140,6 +148,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
             return;
         }
 
+        // assign each member to an individual id
+        await this.memberAssignService.AssignEachMemberToAnIndividualId(roomCode, socket.id);
+
         // join room
         socket.join(roomCode);
 
@@ -151,9 +162,17 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.in(roomCode).emit('roomMemberCount', roomMemberCount);
 
         // send peer socket id to the later participant 
-        otherMembers.forEach(peerSocketId => {
-            socket.emit('register', { offerId: socket.id, answerId: peerSocketId });
+        otherMembers.forEach(async peerSocketId => {
+            // get assigned id
+            const assignedId = await this.memberAssignService.getAssignedUserId(roomCode, peerSocketId);
+            socket.emit('register', { offerId: socket.id, answerId: peerSocketId, assignedId: assignedId });
         });
+
+         // get assigned id
+         const assignedId = await this.memberAssignService.getAssignedUserId(roomCode, socket.id);
+
+         // send my own assigned id
+         socket.emit('getMyAssignedId', assignedId);
     }
 
     // subscribe offer candidate (offer member -> answer member) 
@@ -174,7 +193,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         // find which room the member joined
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+        const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
         // check room
         if (!roomCode) {
@@ -214,7 +233,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         // find which room the member joined
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+        const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
         // check room
         if (!roomCode) {
@@ -254,7 +273,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         // find which room the member joined
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+        const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
         // check room
         if (!roomCode) {
@@ -268,6 +287,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
             socket.disconnect(true);
             return;
         }
+
+        // get assigned id
+        const assignedId = await this.memberAssignService.getAssignedUserId(roomCode, socket.id);
+
+        // add assgined ID data
+        offerSDPMessage.assignedId = assignedId;
 
         // peer id
         const { answerId } = offerSDPMessage;
@@ -294,7 +319,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         // find which room the member joined
-        const roomCode = this.memberRoomService.getMemberRoom(socket.id);
+        const roomCode = await this.memberRoomService.getMemberRoom(socket.id);
 
         // check room
         if (!roomCode) {
