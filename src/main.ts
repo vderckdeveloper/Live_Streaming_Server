@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -32,8 +33,11 @@ async function bootstrap() {
     methods: ['GET', 'POST'],
   });
 
+  // config service
+  const configService = app.get(ConfigService);
+
   // session adapter
-  const redisAdapter = new RedisAdapter(app);
+  const redisAdapter = new RedisAdapter(app, configService);
 
   // Ensure the adapter is initialized before any server or WebSocket setup
   await redisAdapter.initializeAdapter();
