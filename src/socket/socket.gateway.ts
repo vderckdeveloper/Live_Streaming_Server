@@ -18,7 +18,7 @@ import { MemberAssignService } from 'src/memberassign/memberAssign.service';
 
 // origin host for development and production
 const developmentOriginHost = 'http://localhost:3000';
-const productionOriginHost = 'https://your-service-domain.com';
+const productionOriginHost = 'https://liveedumeet.com';
 
 interface RoomCode {
     roomCode: string;
