@@ -8,6 +8,7 @@ export class RoomNameService {
     constructor(private redisService: RedisService) { }
 
     async onModuleInit() {
+        console.log('jenkins pipe line test console');
         const redisClient = await this.redisService.getClient();
         this.redisClientV4 = redisClient.v4;
     }
