@@ -1,73 +1,112 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## 🎉 Intro
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**`✅ This is a Web RTC project made with nest js ✅`** 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is **`Signal Server`** of Web RTC-based live streaming project
 
-## Description
+Hey, there! I'm **`SEUNGMIN LEE`** and welcome to the core of my live-streaming journey. 
+This project represents where Web RTC(Real-Time Communication) meets seamless real-time video delivery. It’s been fueled by my passion for interactive media, backed by countless hours of coding and fine-tuning 🛠️.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+From concept to execution, this project is packed with moments of breakthrough and discovery. Whether it was solving tricky WebRTC challenges or building robust CI/CD pipelines, every piece of it captures those "Wait, what if I try this?" moments followed by "Yes, it worked!" victories 🎯.
 
-## Installation
+Take a deep dive into this live-streaming experience, and get a glimpse of the dedication behind the code 💡. I hope you enjoy exploring it as much as I did building it!
+
+So, kick back, have a look, and enjoy the ride through **`my coding adventure 😎`** 
+
+&nbsp; 
+## ⚙️ Installation
 
 ```bash
-$ npm install
+# clone the repoistory
+git clone https://github.com/vderckdeveloper/Live_Streaming_Server.git
 ```
 
-## Running the app
+```bash
+# navigate to the project directory 
+cd /your-project-route
+```
 
 ```bash
-# development
-$ npm run start
+# install dependencies
+npm install
+```
 
-# watch mode
-$ npm run start:dev
+&nbsp; 
+## 🚀 Start
 
+Run the server:
+
+```bash
+# development mode
+npm run dev
+```
+
+```bash
 # production mode
-$ npm run start:prod
+npm run start
 ```
 
-## Test
+You can Start this project with PM2 or Docker.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# pm2 start mode
+pm2 start ecosystem.config.js
 ```
 
-## Support
+```bash
+# build docker file
+docker build -t 'project-name' ./
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# start with docker-compose.yml. 
+# this project does not come with configured docker-compose. make you own to run it with docker
+docker compose up -d 
+```
 
-## Stay in touch
+&nbsp; 
+## 📁 Folder Structure 
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Folder structure bellow will be updated later
+&nbsp; 
+```bash
+│  .dockerignore                      // docker ingore
+│  Dockerfile                         // docker build config
+│  ecosystem.config.js                // pm2 config
+│  .eslintrc.json                     // eslint config
+│  .gitignore                         // git ignore config
+│  package-lock.json                  // package lock json
+│  package.json                       // package json
+│  README.md                          // README.md
+│  tsconfig.json                      // js config
+│          
+├─src
+│  ├─adapter                          // redis adapter
+│  ├─memberassign                     // assign member
+│  ├─memberroom                       // assign room
+│  ├─redis                            // redis      
+│  ├─roomname                         // room name 
+│  └─socket                           // websocket
+```
 
-## License
+&nbsp; 
+## 🌐 OFFICAL WEBSITE
 
-Nest is [MIT licensed](LICENSE).
+Open [https://liveedumeet.com](https://liveedumeet.com)
+
+&nbsp; 
+## 🔒 LICENSE
+
+- This project and all of its contents are the sole property of **`SEUNGMIN LEE`**.
+- The software is provided as-is without warranty of any kind, express or implied. 
+- No license is granted for reuse, modification, distribution, or commercial use by other parties without explicit written permission from **`SEUNGMIN LEE`**.
+- This project is proprietary software intended exclusively for use by **`SEUNGMIN LEE`**, and any access, use, modification, or distribution by anyone other than **`SEUNGMIN LEE`** is strictly prohibited.
+- For any inquiries regarding the use, distribution, or modification of this project, please contact **`SEUNGMIN LEE`**.
+
+&nbsp; 
+## 📞 CONTACT
+
+**`SEUNGMIN LEE`**
+
+- **📩 Email**: [vderckdeveloper@gmail.com](mailto:vderckdeveloper@gmail.com)
+- **📱 Phone**: +82 010 7303 5185 
